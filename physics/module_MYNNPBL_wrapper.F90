@@ -38,7 +38,7 @@
 !!
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  im,levs,                        &
-     &  flag_init,flag_restart,         &
+     &  flag_init,flag_restart,cycling, &
      &  lssav, ldiag3d, qdiag3d,        &
      &  lsidea, cplflx,                 &
      &  delt,dtf,dx,zorl,               &
@@ -84,13 +84,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    &
      &  du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,      &
      &  do3dt_PBL, dq3dt_PBL, dt3dt_PBL,                   &
-     &  htrsw, htrlw, xmu,                                 &
+     &  htrsw, htrlw, xmu, spp_wts_pbl,                    &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
      &  bl_mynn_edmf_part, bl_mynn_cloudmix, bl_mynn_mixqt,&
      &  bl_mynn_output,                                    &
-     &  icloud_bl, do_mynnsfclay,                          &
+     &  icloud_bl, do_mynnsfclay, do_spp,                  &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
      &  ltaerosol, lprnt, errmsg, errflg  )
@@ -190,7 +190,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
-                             lprnt, do_mynnsfclay
+                             lprnt, do_mynnsfclay, cycling, &
+                             do_spp                       
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
      &       bl_mynn_mixlength,                             &
@@ -209,16 +210,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
-     &       spp_pbl=0,                                     &
      &       bl_mynn_mixscalars=1,                          &
      &       levflag=2
       LOGICAL ::                                            &
      &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC,          &
      &       FLAG_QNWFA, FLAG_QNIFA
-      ! Define locally until needed from CCPP
-      LOGICAL, PARAMETER :: cycling = .false.
       INTEGER, PARAMETER :: param_first_scalar = 1
       INTEGER ::                                            &
+       &      spp_pbl,                                      &
        &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
 
 !MYNN-1D
@@ -266,6 +265,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        do3dt_PBL, dq3dt_PBL, dt3dt_PBL
     real(kind=kind_phys), dimension(im), intent(in) :: xmu
     real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
+
+    ! spp_wts_pbl only allocated if do_spp == .true.
+    real(kind_phys), dimension(:,:),       intent(inout) :: spp_wts_pbl
+
      !LOCAL
       real(kind=kind_phys), dimension(im,levs) ::                        &
      &        sqv,sqc,sqi,qnc,qni,ozone,qnwfa,qnifa,                     &
@@ -494,6 +497,16 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              pattern_spp_pbl(i,k)=0.0
          enddo
       enddo
+
+      if ( do_spp ) then
+         spp_pbl=1
+         do k=1,levs
+            do i=1,im
+             pattern_spp_pbl(i,k)=spp_wts_pbl(i,k)
+           enddo
+        enddo
+      endif
+
       do i=1,im
          if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
             xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
