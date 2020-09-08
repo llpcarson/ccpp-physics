@@ -38,7 +38,7 @@
 !!
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  im,levs,                        &
-     &  flag_init,flag_restart,cycling, &
+     &  flag_init,flag_restart,         &
      &  lssav, ldiag3d, qdiag3d,        &
      &  lsidea, cplflx,                 &
      &  delt,dtf,dx,zorl,               &
@@ -190,8 +190,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
-                             lprnt, do_mynnsfclay, cycling, &
+                             lprnt, do_mynnsfclay,          &
                              do_spp                       
+      LOGICAL, PARAMETER :: cycling = .false.
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
      &       bl_mynn_mixlength,                             &
@@ -267,7 +268,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
 
     ! spp_wts_pbl only allocated if do_spp == .true.
-    real(kind_phys), dimension(:,:),       intent(inout) :: spp_wts_pbl
+    real(kind_phys), dimension(:,:),       intent(in) :: spp_wts_pbl
 
      !LOCAL
       real(kind=kind_phys), dimension(im,levs) ::                        &

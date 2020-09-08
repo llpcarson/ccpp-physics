@@ -1095,6 +1095,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
 [do_spp]
   standard_name = flag_for_stochastic_spp_option
   long_name = flag for stochastic spp option
@@ -1102,6 +1103,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [grav_settling]
   standard_name = grav_settling
   long_name = flag to activate gravitational setting of fog
