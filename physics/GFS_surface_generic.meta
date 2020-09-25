@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_surface_generic_pre
+  type = scheme
+  dependencies = machine.F,surface_perturbation.F90
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_surface_generic_pre_run
   type = scheme
@@ -275,6 +281,7 @@
   dimensions = (number_of_land_surface_variables_perturbed) 
   type = real
   kind = kind_phys
+  intent = in 
   optional = F
 [lndp_var_list]
   standard_name = variables_to_be_perturbed_for_landperts
@@ -283,6 +290,7 @@
   dimensions =  (number_of_land_surface_variables_perturbed) 
   type = character
   kind = len=3
+  intent = in 
   optional = F
 [z01d]
   standard_name = perturbation_of_momentum_roughness_length
@@ -478,6 +486,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_surface_generic_post
+  type = scheme
+  dependencies = machine.F,surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]
