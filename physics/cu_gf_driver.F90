@@ -46,11 +46,6 @@ contains
 
       end subroutine cu_gf_driver_init
 
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_cu_gf_driver_finalize Argument Table
-!!
       subroutine cu_gf_driver_finalize()
       end subroutine cu_gf_driver_finalize
 !
@@ -190,10 +185,10 @@ contains
    real(kind=kind_phys), dimension (im)  :: hfx,qfx
    real(kind=kind_phys) tem,tem1,tf,tcr,tcrf
 
-   parameter (tf=243.16, tcr=270.16, tcrf=1.0/(tcr-tf))
+  !parameter (tf=243.16, tcr=270.16, tcrf=1.0/(tcr-tf)) ! FV3 original
   !parameter (tf=263.16, tcr=273.16, tcrf=1.0/(tcr-tf))
   !parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
-  !parameter (tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf)) ! as fim
+  parameter (tf=258.16, tcr=273.16, tcrf=1.0/(tcr-tf)) ! as fim, HCB tuning
   ! initialize ccpp error handling variables
      errmsg = ''
      errflg = 0
