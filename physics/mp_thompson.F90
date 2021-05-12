@@ -332,6 +332,7 @@ module mp_thompson
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, reset, do_radar_ref,      &
                               re_cloud, re_ice, re_snow,           &
+                              spp_wts_mp, do_spp,                  &
                               mpicomm, mpirank, mpiroot,           &
                               errmsg, errflg)
 
@@ -419,14 +420,32 @@ module mp_thompson
          integer         :: has_reqs
          ! DH* 2020-06-05 hardcode these values for not using random perturbations,
          ! hasn't been tested yet with this version of module_mp_thompson.F90
-         integer, parameter :: rand_perturb_on = 0
+         !+---+-----------------------------------------------------------------+
+         !gthompsn 21Mar2018
+         ! Setting spp_mp to 1 gives graupel Y-intercept pertubations (2^0)
+         !                   2 gives cloud water distribution gamma shape parameter
+         !                   perturbations (2^1)
+         !                   4 gives CCN & IN activation perturbations (2^2)
+         !                   3 gives both 1+2
+         !                   5 gives both 1+4
+         !                   6 gives both 2+4
+         !                   7 gives all 1+2+4
+         ! For now (22Mar2018), standard deviation should be only 0.25 and cut-off at 1.5
+         ! in order to constrain the various perturbations from being too extreme.
+         !+---+-----------------------------------------------------------------+
          integer, parameter :: kme_stoch = 1
+         integer, parameter :: spp_mp = 7 ! default as 7 to perturb all three fields 
+         logical,         optional, intent(in   ) :: do_spp
+         ! spp_wts_mp only allocated if do_spp == .true.
+         real(kind_phys),              intent(in) :: spp_wts_mp(:,:)
+         real(kind_phys) :: pattern_spp_mp(1:ncol,1:nlev)
          !real(kind_phys) :: rand_pert(1:ncol,1:kme_stoch)
          ! *DH 2020-06-05
          ! Dimensions used in mp_gt_driver
          integer         :: ids,ide, jds,jde, kds,kde, &
                             ims,ime, jms,jme, kms,kme, &
                             its,ite, jts,jte, kts,kte
+         integer :: i,k
 
          ! Initialize the CCPP error handling variables
          errmsg = ''
@@ -438,6 +457,20 @@ module mp_thompson
             errflg = 1
             return
          end if
+
+         do k=1,nlev
+            do i=1,ncol
+                pattern_spp_mp(i,k)=0.0
+            enddo
+         enddo
+
+         if ( do_spp ) then
+            do k=1,nlev
+                do i=1,ncol
+                    pattern_spp_mp(i,k)=spp_wts_mp(i,k)
+                enddo
+            enddo
+         endif
 
          if (is_aerosol_aware .and. .not. (present(nc)     .and. &
                                            present(nwfa)   .and. &
@@ -559,10 +592,8 @@ module mp_thompson
                                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                                  re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                                 ! DH* 2020-06-05 not passing this optional argument, see
-                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
-                                 !rand_pert=rand_pert,                                          &
+                                 rand_perturb_on=do_spp, kme_stoch=kme_stoch,                   &
+                                 rand_pert=pattern_spp_mp,                                      &
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
@@ -578,10 +609,9 @@ module mp_thompson
                                  refl_10cm=refl_10cm,                                           &
                                  diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                                  has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
-                                 rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
-                                 ! DH* 2020-06-05 not passing this optional argument, see
-                                 !       comment in module_mp_thompson.F90 / mp_gt_driver
-                                 !rand_pert=rand_pert,                                          &
+!! should this be spp_mp (=7) or just the flag?  how to turn it "off" when hard-coding =7?
+                                 rand_perturb_on=do_spp, kme_stoch=kme_stoch,                   &
+                                 rand_pert=pattern_spp_mp,                                      &
                                  ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                                  ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                                  its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &

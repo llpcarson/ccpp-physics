@@ -270,6 +270,23 @@
   kind = kind_phys
   intent = out
   optional = T
+[spp_wts_mp]
+  standard_name = weights_for_stochastic_spp_mp_perturbation
+  long_name = weights for stochastic spp mp perturbation
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[do_spp]
+  standard_name = flag_for_stochastic_spp_option
+  long_name = flag for stochastic spp option
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [mpicomm]
   standard_name = mpi_comm
   long_name = MPI communicator

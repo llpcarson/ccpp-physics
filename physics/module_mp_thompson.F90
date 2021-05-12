@@ -1093,15 +1093,15 @@ MODULE module_mp_thompson
       if (present(errmsg)) errmsg = ''
       if (present(errflg)) errflg = 0
 
-      ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
-      ! from a newer version of the Thompson MP scheme, but it has not been
-      ! tested yet.
-      if (rand_perturb_on .ne. 0) then
-        errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
-                 'has not been tested yet with this version of the Thompson scheme'
-        errflg = 1
-        return
-      end if
+      !!! DH* 2020-06-05: The stochastic perturbations code was retrofitted
+      !!! from a newer version of the Thompson MP scheme, but it has not been
+      !!! tested yet.
+      !!if (rand_perturb_on .ne. 0) then
+      !!  errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
+      !!           'has not been tested yet with this version of the Thompson scheme'
+      !!  errflg = 1
+      !!  return
+      !!end if
       ! Activate this code when removing the guard above
       !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
       !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
